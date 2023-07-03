@@ -128,7 +128,8 @@ const html = (content) => `<html>
         }
     </style>
     <body>
-    ${content}
+    <div style=text-align:center;>
+    ${content}</div>
     
     </body> 
     </html>`

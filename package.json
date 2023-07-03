@@ -3,15 +3,26 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "homepage": "http://localhost:3005/pods",
+  "author": "Sreeman",
+  "contributors": {
+    "name": "Sreeman Badugu",
+    "email": "sreeman.badugu@ncr.com",
+    "url": "http://barnyrubble.tumblr.com/"
+  },
+  "bugs": {
+    "email": "sreeman.badugu@ncr.com"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app.js"
   },
   "dependencies": {
     "express": "^4.17.1",
+    "js-data-table": "^1.0.3",
+    "lodash": "^4.17.21",
     "nodemon": "^2.0.22"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC"
 }
