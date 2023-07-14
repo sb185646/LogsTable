@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "express": "^4.17.1",
-    "js-data-table": "^1.0.3",
+    "js-data-table": "^1.0.4",
     "lodash": "^4.17.21",
     "nodemon": "^2.0.22"
   },

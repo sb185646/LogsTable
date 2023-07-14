@@ -16,111 +16,138 @@ const pods = [
     },
     {
         "podName": "svclb-jarvis-rediscache-v7c8r",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "svclb-jarvis-rediscache-f2h6t",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "svclb-jarvis-mosquitto-j6n88",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "svclb-jarvis-rediscache-r4gh8",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "svclb-jarvis-mosquitto-qhqjg",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "svclb-jarvis-mosquitto-vhptv",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-rediscache-fd6846878-d6scn",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-mongodb-8699c48f8-4rbkt",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-mosquitto-585bd68957-plwfx",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-jarvisconfigservice-59fc5c96d-p7hjw",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxweightsecurity-798d5d6f4-jrjqk",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxtrilight-687bdf5c85-xz7pj",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxweightlearning-f98d66ff9-d46cn",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxpicklist-75844874b-zlbgx",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxauthentication-59bbd65dfb-zndfz",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxintervention-5898f5496-g7jvs",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxerrorlookup-66dc5b5dfc-x9s85",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxcashservice-746df5f56f-7cdbx",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxcoupon-57577c75b-mdf4z",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxvisualverify-774cfd74b-9jlj2",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxui-766c978d7b-bdc4v",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxprinter-5f7f69c8f7-qhz4z",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxdoc-84bbf6f9f4-bstrw",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxcoreservice-6f5bf6868-zd7vn",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxinputsequencer-b957c65fc-pppn6",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-scoxresources-cd6b85495-bdbbj",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     },
     {
         "podName": "jarvis-poslessadapter-cd6b85495-bdbbj",
-        scale: ''
+        scale: '',
+        namespace: 'store'
     }
 ]
 const getPodNameWithoutHash = (n) => {
@@ -145,31 +172,34 @@ app.get('/', (_, res) => {
     </div>`));
 })
 app.get('/pods', (req, res) => {
-    exec('kubectl get pods -n store', (error, stdout, stderr) => {
+    exec('kubectl get pods -A', (error, stdout, stderr) => {
         if (error) {
             console.error(`exec error: ${error}`);
             res.send('<h1>OOPS! Failed to get logs</h1>')
             return;
         }
         const containers = stdout.split('\n').reduce((a, s) => {
-            const { 0: podName, 2: status } = s.split(' ').filter(c => c);
-            a.push({ podName, status, scale: 'up' })
+            const { 0: namespace, 1: podName, 3: status } = s.split(' ').filter(c => c);
+            a.push({ namespace, podName, status, scale: 'up' })
             return a;
         }, []);
-        
-        containers.push(...getScaledDownPods(containers, pods).map(c => ({ podName: c, scale: 'down' })))
-        res.send(html(containers.map(({ podName, status, scale }) => {
+        containers.push(...getScaledDownPods(containers, pods).map(c => ({ podName: c, scale: 'down' })));
+        console.log(containers.sort((a, b) => a.namespace?.localeCompare(b.namespace)))
+
+        res.send(html(containers.map(({ namespace, podName, status, scale }) => {
             let a = '';
             if (podName) {
+                const rowClass = podName.toUpperCase() !== 'NAME' ? 'row' : 'rowHeader';
                 const showButtons = podName.toUpperCase() !== 'NAME'
                     ? `
-                <form style=display:initial;margin:0;flex:1; method="GET" action=/${scale === 'up' ? 'scale-pod-down' : 'scale-pod-up'}/${podName}>
+                <form style=all:initial;margin:0;width:200px;text-align:center; method="GET" action=/${scale === 'up' ? 'scale-pod-down' : 'scale-pod-up'}/${namespace}/${podName}>
                 <button>${scale === 'up' ? 'Scale Down' : 'Scale up'}</button> 
-                </form>` : '<div style=flex:1;>Scale</div>';
+                </form>` : '<div>Scale</div>';
                 a += `
-                <div style=margin:0px;white-space:break-spaces;display:flex;justify-content:space-evenly;align-items:center;>
-                <a href=/pod-logs/${podName} style=flex:1;>${podName}</a>
-                <span style=flex:1;>${status}</span>
+                <div class=${rowClass}>
+                <div class=link>${namespace}</div>
+                <a href=/pod-logs/${namespace}/${podName} class=link>${podName}</a>
+                <span style=width:150px>${status}</span>
                 ${showButtons}
                 <br/></div>
                 `;
@@ -179,8 +209,8 @@ app.get('/pods', (req, res) => {
     });
 })
 
-app.get('/pod-logs/:id', (req, res) => {
-    const query = `kubectl logs -n store ${req.params.id}`
+app.get('/pod-logs/:namespace/:id', (req, res) => {
+    const query = `kubectl logs -n ${req.params.namespace || 'store'} ${req.params.id}`
     console.log({ id: req.params.id, query })
     exec(query, (error, stdout, stderr) => {
         let finalRes = '';
@@ -214,9 +244,9 @@ app.get('/pod-logs/:id', (req, res) => {
     });
 })
 
-app.get('/:podUpDown/:id', (req, res) => {
+app.get('/:podUpDown/:namespace/:id', (req, res) => {
     console.log(getPodNameWithoutHash(req.params.id), req.params.podUpDown)
-    exec(`kubectl scale deploy ${getPodNameWithoutHash(req.params.id)} -n store --replicas=${req.params.podUpDown === 'scale-pod-down' ? 0 : 1}`, (error, stdout, stderr) => {
+    exec(`kubectl scale deploy ${getPodNameWithoutHash(req.params.id)} -n ${req.params.namespace || 'store'} --replicas=${req.params.podUpDown === 'scale-pod-down' ? 0 : 1}`, (error, stdout, stderr) => {
         if (error) {
             res.send('<h1>OOPS! Failed to scale down</h1>')
             return;

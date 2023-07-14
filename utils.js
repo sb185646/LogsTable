@@ -19,6 +19,36 @@ const html = (content) => `<html>
         .app-button:hover{
             background: #da7474;
         }
+        .link{
+            flex:1;
+            text-decoration: none;
+            color: black;
+        }
+        .row{
+            margin: 0px;
+            white-space: break-spaces;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            padding: 5px;
+            border: 1px solid black;
+            width:900px;
+        }
+        .rowHeader{
+            margin: 0px;
+            white-space: break-spaces;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            padding: 5px;
+            width:900px;
+        }
+        .row > *{
+            border-right: 1px solid black;
+        }
+        .row:nth-child(odd){
+            background: #e6f0e9;
+        }
     </style>
     <body>
     <div style=text-align:center;>
